@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Flyer - Multiplicateurs Générés</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .info-box {
+            position: fixed;
+            left: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            color: #333;
+        }
+
+        #generated-results {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            color: #333;
+        }
+
+        .result-item {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #e9ecef;
+        }
+
+        .result-item strong {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div id="generated-results" class="info-box">
+        <h4>Multiplicateurs et Nombres Générés</h4>
+        <div id="results-list">
+            <!-- Les résultats générés s'afficheront ici -->
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            const resultsList = document.getElementById('results-list');
+
+            // Fonction pour générer un multiplicateur selon l'algorithme Python
+            function chooseMultiplier() {
+                const multipliers = Array.from({ length: 290 }, (_, i) => 1.2 + (i * (30 - 1.2) / 289));
+                const weights = multipliers.map(m => {
+                    const weight = Math.exp(-0.3 * m);
+                    return m > 5 ? weight * 0.1 : weight;
+                });
+
+                const totalWeight = weights.reduce((acc, w) => acc + w, 0);
+                const normalizedWeights = weights.map(w => w / totalWeight);
+
+                return weightedRandomChoice(multipliers, normalizedWeights);
+            }
+
+            // Fonction pour générer un nombre selon l'algorithme Python
+            function chooseNumber() {
+                const numbers = Array.from({ length: 30 }, (_, i) => i + 1);
+                const weights = numbers.map(n => {
+                    const weight = Math.exp(-0.2 * n);
+                    return n > 15 ? weight * 0.1 : weight;
+                });
+
+                const totalWeight = weights.reduce((acc, w) => acc + w, 0);
+                const normalizedWeights = weights.map(w => w / totalWeight);
+
+                return weightedRandomChoice(numbers, normalizedWeights);
+            }
+
+            // Fonction pour effectuer une sélection aléatoire pondérée
+            function weightedRandomChoice(values, probabilities) {
+                const rand = Math.random();
+                let cumulative = 0;
+
+                for (let i = 0; i < values.length; i++) {
+                    cumulative += probabilities[i];
+                    if (rand < cumulative) {
+                        return values[i];
+                    }
+                }
+                return values[values.length - 1];
+            }
+
+            // Fonction pour afficher les résultats générés
+            function displayResults(multiplier, number) {
+                const timestamp = new Date().toLocaleTimeString();
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <strong>${timestamp} :</strong><br>
+                    Multiplicateur : ${multiplier.toFixed(2)}x<br>
+                    Nombre : ${number}
+                `;
+                resultsList.prepend(resultItem); // Ajouter au début de la liste
+            }
+
+            // Générer et afficher un résultat toutes les 5 secondes
+            setInterval(() => {
+                const multiplier = chooseMultiplier();
+                const number = chooseNumber();
+                console.log(`Multiplicateur généré : ${multiplier.toFixed(2)}`);
+                console.log(`Nombre généré : ${number}`);
+                displayResults(multiplier, number);
+            }, 5000); // Intervalle de 5 secondes
+        })();
+    </script>
+</body>
+</html>
